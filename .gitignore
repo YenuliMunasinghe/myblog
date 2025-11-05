@@ -1,0 +1,13 @@
+# .gitignore
+
+# Ignore environment variables file
+.env
+
+# Ignore vendor directory (if using Composer in the future)
+/vendor/
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore Visual Studio Code specific files
+.vscode/
