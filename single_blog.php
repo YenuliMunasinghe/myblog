@@ -52,9 +52,54 @@ $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user
                 <?php endif; ?>
             </div>
             <div class="blog-content-full">
-                <!-- For Markdown, you would use a PHP Markdown parser library here -->
+                <!-- For Markdown, using a PHP Markdown parser library here -->
                 <p style="white-space: pre-wrap;"><?php echo htmlspecialchars($blog['content']); ?></p>
             </div>
+           <div class="blog-likes-section">
+            <?php
+            // Get current user's login status and ID
+            $user_logged_in = isset($_SESSION['user_id']);
+            $current_user_id = $_SESSION['user_id'] ?? null;
+            $blog_id_for_like_feature = htmlspecialchars($blog['id']); // Ensuring blog_id is safe for HTML
+
+            // 1. Get total likes for this specific blog post
+            $stmt_likes = $pdo->prepare("SELECT COUNT(*) AS total_likes FROM likes WHERE blog_id = ?");
+            $stmt_likes->execute([$blog_id_for_like_feature]);
+            $total_likes = $stmt_likes->fetch()['total_likes'];
+
+            // 2. Check if the current logged-in user has already liked this post
+            $user_has_liked = false;
+            if ($user_logged_in) {
+                $stmt_user_like = $pdo->prepare("SELECT COUNT(*) FROM likes WHERE blog_id = ? AND user_id = ?");
+                $stmt_user_like->execute([$blog_id_for_like_feature, $current_user_id]);
+                $user_has_liked = ($stmt_user_like->fetchColumn() > 0);
+            }
+            ?>
+            <span class="like-count"><i class="fas fa-heart"></i> <?php echo $total_likes; ?> Likes</span>
+
+            <?php if ($user_logged_in): ?>
+                <!-- Form to submit like/unlike action -->
+                <!-- Use a relative action so the URL resolves correctly in subfolder or root installs -->
+                <form action="actions/toggle_like.php" method="POST" style="display: inline-block; margin-left: 15px;">
+                    <input type="hidden" name="blog_id" value="<?php echo $blog_id_for_like_feature; ?>">
+                    <button type="submit" class="btn btn-like <?php echo $user_has_liked ? 'liked' : ''; ?>" title="<?php echo $user_has_liked ? 'Unlike this post' : 'Like this post'; ?>">
+                        <?php if ($user_has_liked): ?>
+                            <i class="fas fa-heart"></i> Unlike
+                        <?php else: ?>
+                            <i class="far fa-heart"></i> Like
+                        <?php endif; ?>
+                    </button>
+                </form>
+            <?php else: ?>
+                <!-- Message for non-logged-in users -->
+                <span style="margin-left: 15px; color: var(--light-text); font-size: 0.9em;">
+                    <!-- Use relative login URL so it works in subfolder installs as well -->
+                    <a href="auth/login.php">Login</a> to like this post.
+                </span>
+            <?php endif; ?>
+        </div>
+
+
 
             <?php if ($is_author): ?>
                 <div class="blog-actions">

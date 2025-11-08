@@ -24,15 +24,15 @@ if ($message): ?>
     </div>
 </section>
 
-<!-- Trending on BlogSphere Section -->
+<!-- Trending on MyBlog Section -->
 <section id="trending" class="trending-section">
     <div class="container">
-        <h2>Trending on BlogSphere</h2>
+        <h2>Trending on MyBlog</h2>
         <div class="blog-grid">
             <?php
             try {
-                // Prepare a SQL query to get all blog posts, ordered by creation date (newest first)
-                // We also join with the 'users' table to get the author's username
+                // Prepared a SQL query to get all blog posts, ordered by creation date (newest first)
+                //  joined with the 'users' table to get the author's username
                 $stmt = $pdo->prepare("SELECT blogPosts.*, users.username FROM blogPosts JOIN users ON blogPosts.user_id = users.id ORDER BY blogPosts.created_at DESC LIMIT 6"); // Limit to 6 for trending
                 $stmt->execute();
                 $blogs = $stmt->fetchAll();
@@ -41,7 +41,8 @@ if ($message): ?>
                     foreach ($blogs as $blog) {
                         echo '<div class="blog-card">';
                         echo '<a href="/single_blog.php?id=' . htmlspecialchars($blog['id']) . '">';
-                        echo '<img src="' . (empty($blog['image_url']) ? 'https://via.placeholder.com/400x200/333333/FFFFFF?text=Blog+Image' : htmlspecialchars($blog['image_url'])) . '" alt="' . htmlspecialchars($blog['title']) . '">';
+                        echo '<img src="' . (empty($blog['image_url']) ? 'https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg' : $blog['image_url']) . '" alt="' . htmlspecialchars($blog['title']) . '">';
+                        // echo '<img src="' . (empty($blog['image_url']) ? 'https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg' : htmlspecialchars($blog['image_url'])) . '" alt="' . htmlspecialchars($blog['title']) . '">';
                         echo '</a>';
                         echo '<div class="card-content">';
                         echo '<h3><a href="/single_blog.php?id=' . htmlspecialchars($blog['id']) . '">' . htmlspecialchars($blog['title']) . '</a></h3>';
@@ -64,9 +65,9 @@ if ($message): ?>
 <!-- About Us Section -->
 <section id="about" class="features-section"> <!-- Reusing features-section styling -->
     <div class="container">
-        <h2>About BlogSphere</h2>
+        <h2>About MyBlog</h2>
         <p class="form-subtitle" style="max-width: 800px; margin-left: auto; margin-right: auto;">
-            BlogSphere is your go-to platform for sharing stories, ideas, and knowledge with the world. We believe in the power of words to connect, inspire, and educate. Our mission is to provide a seamless and engaging experience for both writers and readers. Join us and start your blogging journey today!
+            MyBlog is your go-to platform for sharing stories, ideas, and knowledge with the world. We believe in the power of words to connect, inspire, and educate. Our mission is to provide a seamless and engaging experience for both writers and readers. Join us and start your blogging journey today!
         </p>
     </div>
 </section>

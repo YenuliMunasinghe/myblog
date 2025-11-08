@@ -30,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_POST['remember_me'])) {
                 // Set a persistent cookie with user ID for 30 days
                 $cookie_name = 'remember_user_id';
-                $cookie_value = $user['id']; // Simple for beginner, see security note above
+                $cookie_value = $user['id']; 
                 $expiration = time() + (30 * 24 * 60 * 60); // 30 days
                 setcookie($cookie_name, $cookie_value, [
                     'expires' => $expiration,
                     'path' => '/', // Available across the entire site
                     'httponly' => true, // HttpOnly: Prevents JavaScript access, important for security
                     'samesite' => 'Lax' // CSRF protection
-                    // 'secure' => true // Uncomment in production if your site uses HTTPS
+                   
                 ]);
             }
 
@@ -81,10 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <button type="submit" class="btn form-submit-btn">Log In</button>
-
-            
-
-            <button type="submit" class="btn form-submit-btn">Log In</button>
         </form>
 
         <p class="form-footer-text">Don't have an account? <a href="/auth/register.php">Sign Up</a></p>

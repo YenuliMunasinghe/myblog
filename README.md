@@ -1,6 +1,6 @@
-# BlogSphere - A Simple PHP Blog Application
+# MyBlog - A Simple PHP Blog Application
 
-BlogSphere is a minimalist blog application built with HTML, CSS, JavaScript for the frontend, PHP for the backend, and MySQL as the database. It allows users to register, log in, create, view, update, and delete their own blog posts.
+MyBlog is a minimalist blog application built with HTML, CSS, JavaScript for the frontend, PHP for the backend, and MySQL as the database. It allows users to register, log in, create, view, update, and delete their own blog posts.
 
 ## Features
 
@@ -38,7 +38,7 @@ BlogSphere is a minimalist blog application built with HTML, CSS, JavaScript for
 
 ## Setup Instructions (Local Development)
 
-Follow these steps to get the project running on your local machine.
+Follow these steps to get the project running on  local machine.
 
 ### Prerequisites
 
@@ -47,17 +47,17 @@ Follow these steps to get the project running on your local machine.
 
 ### 1. Project Setup
 
-1.  **Clone or Download:** Get the project files and place the `myblog` folder inside your web server's document root:
+1.  **Clone or Download:** Get the project files and place the `myblog` folder inside  web server's document root:
     *   `C:\xampp\htdocs\` (for Windows XAMPP)
     *   `/Applications/XAMPP/htdocs/` (for macOS XAMPP)
     *   `C:\wamp\www\` (for Windows WAMP)
     *   `/Applications/MAMP/htdocs/` (for macOS MAMP)
-    So, your project path will be `.../htdocs/myblog/`.
+    So, uproject path will be `.../htdocs/myblog/`.
 
 ### 2. Database Setup (Local)
 
 1.  **Start XAMPP/WAMP/MAMP:** Open the control panel and start `Apache` and `MySQL`.
-2.  **Access phpMyAdmin:** Open your browser and go to `http://localhost/phpmyadmin/`.
+2.  **Access phpMyAdmin:** Open ubrowser and go to `http://localhost/phpmyadmin/`.
 3.  **Create Database:** Click `New` on the left sidebar, enter `blog_app` as the database name, and click `Create`.
 4.  **Import Tables:**
     *   Select the `blog_app` database on the left.
@@ -83,12 +83,12 @@ Follow these steps to get the project running on your local machine.
           FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ```
-        *(Alternatively, you can export your local `blog_app.sql` from your previous setup and import it here)*
+        *(Alternatively, you can export ulocal `blog_app.sql` from uprevious setup and import it here)*
 
 ### 3. Configure Database Connection
 
 1.  **Open `myblog/config/db_connect.php`** in VS Code.
-2.  **Ensure the credentials are set for your local database:**
+2.  **Ensure the credentials are set for ulocal database:**
     ```php
     $host = 'localhost';
     $dbname = 'blog_app';
@@ -98,8 +98,8 @@ Follow these steps to get the project running on your local machine.
 
 ### 4. Run the Application
 
-1.  Ensure `Apache` and `MySQL` are running in your XAMPP/WAMP/MAMP control panel.
-2.  Open your browser and go to `http://localhost/myblog/`.
+1.  Ensure `Apache` and `MySQL` are running in uXAMPP/WAMP/MAMP control panel.
+2.  Open ubrowser and go to `http://localhost/myblog/`.
 
 ## Deployment Instructions (Online Hosting)
 
@@ -110,52 +110,52 @@ Follow these steps to get the project running on your local machine.
 
 ### 2. Database Setup (Online)
 
-1.  **Access Hosting Control Panel:** Log in to your hosting provider's control panel (e.g., cPanel).
+1.  **Access Hosting Control Panel:** Log in to uhosting provider's control panel (e.g., cPanel).
 2.  **Create Database & User:**
     *   Go to "MySQL Databases".
-    *   Create a new database (e.g., `youruser_blogdb`). Note down the full database name.
+    *   Create a new database (e.g., `user_blogdb`). Note down the full database name.
     *   Create a new MySQL user and set a strong password. Note down the full username and password.
-    *   Add the newly created user to your database (`youruser_blogdb`) and grant "ALL PRIVILEGES".
+    *   Add the newly created user to udatabase (`user_blogdb`) and grant "ALL PRIVILEGES".
 3.  **Export Local Database:**
-    *   Go to your local phpMyAdmin (`http://localhost/phpmyadmin/`), select `blog_app`, click the `Export` tab, choose `Custom`, ensure `SQL` format, select all tables, and check "Add DROP TABLE..." then click `Go` to download `blog_app.sql`.
+    *   Go to ulocal phpMyAdmin (`http://localhost/phpmyadmin/`), select `blog_app`, click the `Export` tab, choose `Custom`, ensure `SQL` format, select all tables, and check "Add DROP TABLE..." then click `Go` to download `blog_app.sql`.
 4.  **Import to Online Database:**
-    *   In your hosting control panel, open phpMyAdmin for your *online* database (`youruser_blogdb`).
-    *   Select `youruser_blogdb` on the left.
+    *   In uhosting control panel, open phpMyAdmin for u*online* database (`user_blogdb`).
+    *   Select `user_blogdb` on the left.
     *   Go to the `Import` tab, choose the `blog_app.sql` file you exported, and click `Go`.
 
 ### 3. Configure Database Connection (Online)
 
 1.  **Open `myblog/config/db_connect.php`** in VS Code.
-2.  **Change the credentials to your *online* database details:**
+2.  **Change the credentials to u*online* database details:**
     ```php
-    $host = 'your_online_database_host'; // e.g., 'sql100.infinityfree.com'
-    $dbname = 'your_online_database_name'; // e.g., 'if0_XXXXXXXX_blogdb'
-    $username = 'your_online_database_username'; // e.g., 'if0_XXXXXXXX'
-    $password = 'your_online_database_password'; // The password you set for the DB user
+    $host = 'online_database_host'; // e.g., 'sql100.infinityfree.com'
+    $dbname = 'online_database_name'; // e.g., 'if0_XXXXXXXX_blogdb'
+    $username = 'online_database_username'; // e.g., 'if0_XXXXXXXX'
+    $password = 'online_database_password'; // The password  set for the DB user
     ```
 
 ### 4. Upload Files via FTP
 
-1.  **Connect with FileZilla:** Open FileZilla, enter your FTP Host, Username, Password, and Port (usually 21), then `Quickconnect`.
-2.  **Navigate Remote Site:** On the right (Remote Site), go into your `public_html` (or `htdocs`) folder.
-3.  **Navigate Local Site:** On the left (Local Site), go into your `myblog` project folder (e.g., `C:\xampp\htdocs\myblog`).
-4.  **Upload:** Select *all* files and folders *inside* your local `myblog` folder. Drag them directly into the `public_html` folder on the remote site.
+1.  **Connect with FileZilla:** Open FileZilla, enter uFTP Host, Username, Password, and Port (usually 21), then `Quickconnect`.
+2.  **Navigate Remote Site:** On the right (Remote Site), go into u`public_html` (or `htdocs`) folder.
+3.  **Navigate Local Site:** On the left (Local Site), go into u`myblog` project folder (e.g., `C:\xampp\htdocs\myblog`).
+4.  **Upload:** Select *all* files and folders *inside* ulocal `myblog` folder. Drag them directly into the `public_html` folder on the remote site.
 5.  **Overwrite:** If prompted, choose "Overwrite" and "Always use this action".
 
-### 5. Access Your Live Site
+### 5. Access uLive Site
 
-1.  Open your browser and go to your public URL (e.g., `http://yourusername.infinityfreeapp.com/`).
-2.  Clear your browser cache (`Ctrl+F5` or `Cmd+Shift+R`) for a fresh view.
+1.  Open ubrowser and go to upublic URL (e.g., `http://username.infinityfreeapp.com/`).
+2.  Clear ubrowser cache (`Ctrl+F5` or `Cmd+Shift+R`) for a fresh view.
 
 ## Usage
 
 1.  **Register:** Create a new user account.
-2.  **Login:** Access your account.
+2.  **Login:** Access uaccount.
 3.  **Create Blog:** Add new blog posts with a title, content, and an image URL.
 4.  **View Blogs:** See all posts on the home page or click on a post to view its full content.
-5.  **Edit Blog:** Update your own blog posts (visible only when logged in as the author).
-6.  **Delete Blog:** Remove your own blog posts (visible only when logged in as the author).
-7.  **Logout:** End your session.
+5.  **Edit Blog:** Update uown blog posts (visible only when logged in as the author).
+6.  **Delete Blog:** Remove uown blog posts (visible only when logged in as the author).
+7.  **Logout:** End usession.
 
 ## Future Enhancements (Ideas)
 
@@ -169,4 +169,3 @@ Follow these steps to get the project running on your local machine.
 
 ## Contact
 
-Feel free to reach out if you have questions or suggestions!

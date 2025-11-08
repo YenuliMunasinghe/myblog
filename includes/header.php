@@ -1,15 +1,17 @@
 
 <?php
-// We start session_start() in db_connect.php, which will be included here.
-// Ensure db_connect.php is included before outputting any HTML
-require_once __DIR__ . '/../config/db_connect.php'; // Correct path to db_connect.php
+
+require_once __DIR__ . '/../config/db_connect.php'; //  path to db_connect.php
+
+// Defined a base path used across templates (root or subfolder installs) 
+$base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlogSphere</title> <!-- Changed title to match design -->
+    <title>MyBlog</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,23 +21,20 @@ require_once __DIR__ . '/../config/db_connect.php'; // Correct path to db_connec
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <link rel="stylesheet" href="/css/style.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="/css/style.css"> <!-- Link to CSS file -->
 </head>
-<body>
-<body>
-    <!-- ... (rest of header.php, after <head> and before <body>) ... -->
 <body>
     <header>
         <div class="container">
             <div id="branding">
                 <h1><a href="/index.php">
-                    <i class="fas fa-cube"></i> BlogSphere <!-- Changed logo icon and text -->
+                    <i class="fas fa-cube"></i> MyBlog <!-- Changed logo icon and text -->
                 </a></h1>
             </div>
             <nav>
                 <ul>
                     <li><a href="/index.php">Explore Blogs</a></li> <!-- Changed text -->
-                    <li><a href="/index.php#about">About Us</a></li> <!-- Link to new about section -->
+                    <li><a href="/index.php#about">About Us</a></li> <!-- Link to about section -->
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <!-- Show these links if user is logged in -->
                         <li><a href="/create_blog.php">Create New Blog</a></li>
@@ -49,6 +48,5 @@ require_once __DIR__ . '/../config/db_connect.php'; // Correct path to db_connec
             </nav>
         </div>
     </header>
-    <!-- The main-content container no longer wraps the entire page,
-         it will be applied to specific sections below the header -->
+    
     <div class="container"> <!-- Main content container starts here -->

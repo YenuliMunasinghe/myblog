@@ -35,7 +35,7 @@ if ($blog_id) {
         $title = $blog['title'];
         $content = $blog['content'];
         $image_url = $blog['image_url'];
-        // If you had a 'tags' column, you'd fetch it here
+       
         // $tags = htmlspecialchars($blog['tags']);
     } catch (PDOException $e) {
         $message = '<div class="message error">Error loading blog for edit: ' . htmlspecialchars($e->getMessage()) . '</div>';
@@ -45,7 +45,65 @@ if ($blog_id) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_title = trim($_POST['title']);
     $new_content = trim($_POST['content']);
-    $new_image_url = trim($_POST['image_url']);
+
+    $new_image_url = $image_url; // Default to existing image_url if no new upload
+
+    // Handle image upload
+    if (isset($_FILES['blog_image']) && $_FILES['blog_image']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp_name = $_FILES['blog_image']['tmp_name'];
+        $file_name = $_FILES['blog_image']['name'];
+        $file_size = $_FILES['blog_image']['size'];
+        $file_type = $_FILES['blog_image']['type'];
+
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif','webp'];
+        $max_file_size = 5 * 1024 * 1024; // 5MB
+
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+        // Basic file validation
+        if (!in_array($file_ext, $allowed_extensions)) {
+            $message = '<div class="message error">Invalid file type. Only JPG, JPEG, PNG, GIF are allowed.</div>';
+        } elseif ($file_size > $max_file_size) {
+            $message = '<div class="message error">File size exceeds 5MB limit.</div>';
+        } else {
+            // Generate a unique filename to prevent conflicts
+            // Sanitize the uniqid part to remove extra periods, replacing with underscore
+            $uniqid_part = str_replace('.', '_', uniqid('blog_img_', true));
+            $unique_file_name = $uniqid_part . '.' . $file_ext;
+            $upload_directory = __DIR__ . '/uploads/images/'; // Absolute path to uploads folder
+            $destination_path = $upload_directory . $unique_file_name;
+
+            // Ensure upload directory exists
+            if (!is_dir($upload_directory)) {
+                mkdir($upload_directory, 0755, true); // Create directory if it doesn't exist
+            }
+
+            // Move the uploaded file
+            if (move_uploaded_file($file_tmp_name, $destination_path)) {
+                // If an old image existed and it's a new upload, delete the old one
+                if (!empty($image_url) && $image_url !== $new_image_url) {
+                    $old_image_path = __DIR__ . '/../' . $image_url; // Construct full path to old image
+                    if (file_exists($old_image_path) && is_file($old_image_path)) {
+                        unlink($old_image_path); // Delete old image file
+                    }
+                }
+                // Store the relative path to the image in the database
+                $new_image_url = '/uploads/images/' . $unique_file_name;
+            } else {
+                $message = '<div class="message error">Failed to upload image. Check folder permissions.</div>';
+            }
+        }
+    }
+    // If there's an image upload error, we don't proceed with the blog post save
+    if (!empty($message)) {
+        // Keep the current title and content in case of image upload error
+        $title = $new_title;
+        $content = $new_content;
+        // If there was an image previously, keep it in case of new upload error
+        $image_url = $new_image_url;
+    }
+
+    
     $user_id = $_SESSION['user_id'];
     // $new_tags = trim($_POST['tags']); // If you add a tags field
 
@@ -83,16 +141,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php echo $message; ?>
 
-        <form action="<?php echo htmlspecialchars($form_action); ?>" method="POST" class="blog-editor-form">
+        <form action="<?php echo htmlspecialchars($form_action); ?>" method="POST" enctype="multipart/form-data" class="blog-editor-form">
             <label for="title" style="display: none;">Title:</label> <!-- Hidden label for styling -->
             <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" placeholder="Enter your blog title here..." required>
 
             <label for="content" style="display: none;">Content:</label> <!-- Hidden label for styling -->
             
             <textarea id="content" name="content" placeholder="Start writing your amazing story..." required><?php echo htmlspecialchars($content); ?></textarea>
-<label for="image_url">Image URL (Optional)</label>
-        <input type="text" id="image_url" name="image_url" value="<?php echo htmlspecialchars($image_url); ?>" placeholder="Paste an image URL (e.g., from Unsplash, Imgur)" class="mb-4" style="font-family: var(--font-sans); font-size: 1rem; padding: 10px 15px; border-radius: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 100%; box-sizing: border-box;">
-
+<label for="blog_image">Upload Image (Optional)</label>
+        <input type="file" id="blog_image" name="blog_image" accept="image/*" class="mb-4" style="font-family: var(--font-sans); font-size: 1rem; padding: 10px 15px; border-radius: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 100%; box-sizing: border-box;">
+        <?php if (!empty($image_url)): // Show current image if editing and one exists ?>
+            <div style="margin-bottom: 20px;">
+                <p style="color: var(--light-text); font-size: 0.9em;">Current Image:</p>
+                <img src="<?php echo htmlspecialchars($image_url); ?>" alt="Current Blog Image" style="max-width: 200px; height: auto; border-radius: 8px;">
+            </div>
+        <?php endif; ?>
             
 
             <div class="submit-btn-group">

@@ -3,7 +3,7 @@
 ?>
     <footer>
         <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> BlogSphere. All Rights Reserved.</p>
+            <p>&copy; <?php echo date('Y'); ?> MyBlog. All Rights Reserved.</p>
            
         </div>
     </footer>

@@ -33,6 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['blog_id'])) {
 }
 
 // Redirect back to the home page
-header("Location: /myblog/index.php");
+header("Location: /index.php");
 exit();
 ?>
