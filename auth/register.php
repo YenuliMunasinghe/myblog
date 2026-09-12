@@ -35,7 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } catch (PDOException $e) {
-            $message = '<div class="message error">Registration failed: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            error_log("Registration DB error: " . $e->getMessage());
+            $message = '<div class="message error">Registration failed due to a system error. Please try again.</div>';
         }
     }
 }

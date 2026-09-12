@@ -1,11 +1,19 @@
 <?php
 // myblog/auth/logout.php
-require_once __DIR__ . '/../config/db_connect.php'; // Just to ensure session is started
+require_once __DIR__ . '/../config/db_connect.php'; // Ensures session and DB connection
+
+// Clear Remember Me cookies if set
+if (isset($_COOKIE['remember_me'])) {
+    setcookie('remember_me', '', time() - 3600, '/');
+}
+if (isset($_COOKIE['remember_user_id'])) {
+    setcookie('remember_user_id', '', time() - 3600, '/');
+}
 
 // Destroy all session variables
 $_SESSION = array();
 
-// If it's a cookie-based session, invalidate the session cookie
+// Invalidate session cookie
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -14,13 +22,11 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Finally, destroy the session
+// Destroy session
 session_destroy();
-// Also clear the 'Remember Me' cookie if it exists
-if (isset($_COOKIE['remember_user_id'])) {
-    setcookie('remember_user_id', '', time() - 3600, '/'); // Set expiration in the past to delete
-}
 
+// Start a fresh session for flash message
+session_start();
 $_SESSION['message'] = 'You have been logged out.';
 header("Location: /index.php"); // Redirect to home page
 exit();

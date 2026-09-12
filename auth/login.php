@@ -24,31 +24,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
+                $_SESSION['username'] = $user['username'];
 
-            // Check if 'Remember Me' was checked
-            if (isset($_POST['remember_me'])) {
-                // Set a persistent cookie with user ID for 30 days
-                $cookie_name = 'remember_user_id';
-                $cookie_value = $user['id']; 
-                $expiration = time() + (30 * 24 * 60 * 60); // 30 days
-                setcookie($cookie_name, $cookie_value, [
-                    'expires' => $expiration,
-                    'path' => '/', // Available across the entire site
-                    'httponly' => true, // HttpOnly: Prevents JavaScript access, important for security
-                    'samesite' => 'Lax' // CSRF protection
-                   
-                ]);
-            }
+                // Check if 'Remember Me' was checked
+                if (isset($_POST['remember_me'])) {
+                    // Set a secure persistent cookie with user ID and HMAC signature
+                    $cookie_name = 'remember_me';
+                    $cookie_hash = hash_hmac('sha256', $user['id'], APP_SECRET_KEY);
+                    $cookie_value = $user['id'] . ':' . $cookie_hash;
+                    $expiration = time() + (30 * 24 * 60 * 60); // 30 days
+                    setcookie($cookie_name, $cookie_value, [
+                        'expires'  => $expiration,
+                        'path'     => '/',
+                        'httponly' => true,
+                        'samesite' => 'Lax'
+                    ]);
+                }
 
-            $_SESSION['message'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
-            header("Location: /index.php");
-            exit();
+                $_SESSION['message'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
+                header("Location: /index.php");
+                exit();
             } else {
                 $message = '<div class="message error">Invalid username/email or password.</div>';
             }
         } catch (PDOException $e) {
-            $message = '<div class="message error">Login failed: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            error_log("Login error: " . $e->getMessage());
+            $message = '<div class="message error">Login failed due to a system error. Please try again.</div>';
         }
     }
 }

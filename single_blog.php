@@ -23,7 +23,8 @@ try {
         exit();
     }
 } catch (PDOException $e) {
-    $message = '<p class="message error">Error fetching blog: ' . htmlspecialchars($e->getMessage()) . '</p>';
+    error_log("Fetch single blog error: " . $e->getMessage());
+    $message = '<p class="message error">Error loading blog post. Please try again later.</p>';
 }
 
 $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user_id']);

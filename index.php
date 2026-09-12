@@ -55,7 +55,8 @@ if ($message): ?>
                     echo '<p class="text-center">No blog posts found. Be the first to create one!</p>';
                 }
             } catch (PDOException $e) {
-                echo '<p class="message error text-center">Error fetching blogs: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                error_log("Fetch blogs index error: " . $e->getMessage());
+                echo '<p class="message error text-center">Error fetching blogs. Please try again later.</p>';
             }
             ?>
         </div>

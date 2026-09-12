@@ -38,7 +38,8 @@ if ($blog_id) {
        
         // $tags = htmlspecialchars($blog['tags']);
     } catch (PDOException $e) {
-        $message = '<div class="message error">Error loading blog for edit: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        error_log("Load blog for edit failed: " . $e->getMessage());
+        $message = '<div class="message error">Error loading blog for edit. Please try again.</div>';
     }
 }
 
@@ -53,21 +54,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $file_tmp_name = $_FILES['blog_image']['tmp_name'];
         $file_name = $_FILES['blog_image']['name'];
         $file_size = $_FILES['blog_image']['size'];
-        $file_type = $_FILES['blog_image']['type'];
 
-        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif','webp'];
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $max_file_size = 5 * 1024 * 1024; // 5MB
 
         $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $file_mime = function_exists('mime_content_type') ? mime_content_type($file_tmp_name) : '';
 
-        // Basic file validation
-        if (!in_array($file_ext, $allowed_extensions)) {
-            $message = '<div class="message error">Invalid file type. Only JPG, JPEG, PNG, GIF are allowed.</div>';
+        // Strict file & MIME validation
+        if (!in_array($file_ext, $allowed_extensions) || ($file_mime && !in_array($file_mime, $allowed_mime_types))) {
+            $message = '<div class="message error">Invalid file type. Only JPG, JPEG, PNG, GIF, and WEBP images are allowed.</div>';
         } elseif ($file_size > $max_file_size) {
             $message = '<div class="message error">File size exceeds 5MB limit.</div>';
         } else {
             // Generate a unique filename to prevent conflicts
-            // Sanitize the uniqid part to remove extra periods, replacing with underscore
             $uniqid_part = str_replace('.', '_', uniqid('blog_img_', true));
             $unique_file_name = $uniqid_part . '.' . $file_ext;
             $upload_directory = __DIR__ . '/uploads/images/'; // Absolute path to uploads folder
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (move_uploaded_file($file_tmp_name, $destination_path)) {
                 // If an old image existed and it's a new upload, delete the old one
                 if (!empty($image_url) && $image_url !== $new_image_url) {
-                    $old_image_path = __DIR__ . '/../' . $image_url; // Construct full path to old image
+                    $old_image_path = __DIR__ . '/' . ltrim($image_url, '/'); // Construct full path to old image
                     if (file_exists($old_image_path) && is_file($old_image_path)) {
                         unlink($old_image_path); // Delete old image file
                     }
@@ -105,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     
     $user_id = $_SESSION['user_id'];
-    // $new_tags = trim($_POST['tags']); // If you add a tags field
 
     if (empty($new_title) || empty($new_content)) {
         $message = '<div class="message error">Title and Content cannot be empty.</div>';
@@ -116,14 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$new_title, $new_content, $new_image_url, $blog_id, $user_id]);
                 $_SESSION['message'] = 'Blog post updated successfully!';
             } else {
-                $stmt = $pdo->prepare("INSERT INTO blogPosts (user_id, title, content,image_url) VALUES (?, ?, ?,?)");
-                $stmt->execute([$user_id, $new_title, $new_content,$new_image_url]);
+                $stmt = $pdo->prepare("INSERT INTO blogPosts (user_id, title, content, image_url) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$user_id, $new_title, $new_content, $new_image_url]);
                 $_SESSION['message'] = 'New blog post created successfully!';
             }
             header("Location: /index.php");
             exit();
         } catch (PDOException $e) {
-            $message = '<div class="message error">Operation failed: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            error_log("Blog post save operation failed: " . $e->getMessage());
+            $message = '<div class="message error">Operation failed due to a system error. Please try again.</div>';
         }
     }
 }

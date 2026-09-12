@@ -49,9 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['blog_id'])) {
             $_SESSION['message'] = 'Post liked!';
         }
     } catch (PDOException $e) {
-        // Catch and handle any database-related errors (e.g., table not found, constraint violations)
-        
-        $_SESSION['message'] = 'Error processing your like: ' . htmlspecialchars($e->getMessage());
+        // Catch and handle any database-related errors silently
+        error_log("Toggle like error: " . $e->getMessage());
+        $_SESSION['message'] = 'Error processing your like. Please try again.';
     }
 } else {
     // Handle cases where blog_id is not provided or request method is not POST
