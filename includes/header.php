@@ -1,7 +1,14 @@
-
 <?php
+require_once __DIR__ . '/../config/db_connect.php'; // path to db_connect.php
+require_once __DIR__ . '/csrf.php'; // CSRF token helper
 
-require_once __DIR__ . '/../config/db_connect.php'; //  path to db_connect.php
+// Send security HTTP headers if headers have not yet been sent
+if (!headers_sent()) {
+    header("X-Content-Type-Options: nosniff");
+    header("X-Frame-Options: SAMEORIGIN");
+    header("X-XSS-Protection: 1; mode=block");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+}
 
 // Defined a base path used across templates (root or subfolder installs) 
 $base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/';

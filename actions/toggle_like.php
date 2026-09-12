@@ -4,6 +4,7 @@
 // Start session and get database connection and base path
 //  included header.php to ensure $base_path is defined for redirects
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../includes/csrf.php';
 
 // Compute a robust base path for redirects.
 
@@ -27,6 +28,11 @@ if (!isset($_SESSION['user_id'])) {
 
 // 2. Ensure blog_id is provided via POST method
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['blog_id'])) {
+    if (!verify_csrf_token()) {
+        $_SESSION['message'] = 'Invalid CSRF token.';
+        header("Location: " . $base_path . "single_blog.php?id=" . (int)$_POST['blog_id']);
+        exit();
+    }
     $blog_id = (int) $_POST['blog_id'];
     $blog_id_for_redirect = $blog_id; // Set this for the final redirect
     $user_id = $_SESSION['user_id'];
