@@ -36,6 +36,16 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $username, $password, $options);
+
+    // Auto-migration check for 'tags' column on blogPosts
+    try {
+        $check_col = $pdo->query("SHOW COLUMNS FROM `blogPosts` LIKE 'tags'");
+        if ($check_col && !$check_col->fetch()) {
+            $pdo->exec("ALTER TABLE `blogPosts` ADD COLUMN `tags` VARCHAR(255) DEFAULT NULL");
+        }
+    } catch (Exception $ex) {
+        // Ignore column check failures if table is not yet initialized
+    }
 } catch (PDOException $e) {
     error_log("Database connection failed: " . $e->getMessage());
     die("Database connection failed. Please try again later.");

@@ -1,6 +1,7 @@
 <?php
 ///single_blog.php
 require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/markdown.php';
 
 $blog = null;
 $message = '';
@@ -52,9 +53,21 @@ $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user
                     <span><i class="fas fa-clock"></i> Last updated: <?php echo date('F j, Y, H:i', strtotime($blog['updated_at'])); ?></span>
                 <?php endif; ?>
             </div>
+
+            <?php if (!empty($blog['tags'])): ?>
+                <div class="blog-tags-full" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px;">
+                    <?php 
+                    $tags_arr = array_map('trim', explode(',', $blog['tags']));
+                    foreach ($tags_arr as $tag_item):
+                        if (!empty($tag_item)): ?>
+                            <a href="/index.php?tag=<?php echo urlencode($tag_item); ?>#trending" class="tag-pill" style="font-size: 0.85rem; background: var(--input-bg); color: var(--accent-blue); padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border-color);"><i class="fas fa-tag"></i> <?php echo htmlspecialchars($tag_item); ?></a>
+                        <?php endif;
+                    endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <div class="blog-content-full">
-                <!-- For Markdown, using a PHP Markdown parser library here -->
-                <p style="white-space: pre-wrap;"><?php echo htmlspecialchars($blog['content']); ?></p>
+                <?php echo parse_markdown($blog['content']); ?>
             </div>
            <div class="blog-likes-section">
             <?php
@@ -76,19 +89,18 @@ $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user
                 $user_has_liked = ($stmt_user_like->fetchColumn() > 0);
             }
             ?>
-            <span class="like-count"><i class="fas fa-heart"></i> <?php echo $total_likes; ?> Likes</span>
+            <span class="like-count" id="like-count"><i class="fas fa-heart"></i> <span id="like-number"><?php echo $total_likes; ?></span> Likes</span>
 
             <?php if ($user_logged_in): ?>
                 <!-- Form to submit like/unlike action -->
-                <!-- Use a relative action so the URL resolves correctly in subfolder or root installs -->
-                <form action="actions/toggle_like.php" method="POST" style="display: inline-block; margin-left: 15px;">
+                <form id="like-form" action="actions/toggle_like.php" method="POST" style="display: inline-block; margin-left: 15px;">
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="blog_id" value="<?php echo $blog_id_for_like_feature; ?>">
-                    <button type="submit" class="btn btn-like <?php echo $user_has_liked ? 'liked' : ''; ?>" title="<?php echo $user_has_liked ? 'Unlike this post' : 'Like this post'; ?>">
+                    <button type="submit" id="like-btn" class="btn btn-like <?php echo $user_has_liked ? 'liked' : ''; ?>" title="<?php echo $user_has_liked ? 'Unlike this post' : 'Like this post'; ?>">
                         <?php if ($user_has_liked): ?>
-                            <i class="fas fa-heart"></i> Unlike
+                            <i class="fas fa-heart"></i> <span id="like-text">Unlike</span>
                         <?php else: ?>
-                            <i class="far fa-heart"></i> Like
+                            <i class="far fa-heart"></i> <span id="like-text">Like</span>
                         <?php endif; ?>
                     </button>
                 </form>
