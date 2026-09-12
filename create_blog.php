@@ -12,7 +12,7 @@ $blog_id = $_GET['id'] ?? null;
 $title = '';
 $image_url = '';
 $content = '';
-$tags = 'Technology, Productivity'; // Placeholder tags for styling
+$tags = '';
 $form_action = '/create_blog.php';
 $page_title = 'Create New Post';
 $message = '';
@@ -35,8 +35,7 @@ if ($blog_id) {
         $title = $blog['title'];
         $content = $blog['content'];
         $image_url = $blog['image_url'];
-       
-        // $tags = htmlspecialchars($blog['tags']);
+        $tags = $blog['tags'] ?? '';
     } catch (PDOException $e) {
         error_log("Load blog for edit failed: " . $e->getMessage());
         $message = '<div class="message error">Error loading blog for edit. Please try again.</div>';
@@ -50,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $new_title = trim($_POST['title']);
         $new_content = trim($_POST['content']);
+        $new_tags = trim($_POST['tags'] ?? '');
 
         $new_image_url = $image_url; // Default to existing image_url if no new upload
 
@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Keep the current title and content in case of image upload error
             $title = $new_title;
             $content = $new_content;
+            $tags = $new_tags;
             // If there was an image previously, keep it in case of new upload error
             $image_url = $new_image_url;
         }
@@ -116,12 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 if ($blog_id) {
-                    $stmt = $pdo->prepare("UPDATE blogPosts SET title = ?, content = ?, image_url = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
-                    $stmt->execute([$new_title, $new_content, $new_image_url, $blog_id, $user_id]);
+                    $stmt = $pdo->prepare("UPDATE blogPosts SET title = ?, content = ?, image_url = ?, tags = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
+                    $stmt->execute([$new_title, $new_content, $new_image_url, $new_tags, $blog_id, $user_id]);
                     $_SESSION['message'] = 'Blog post updated successfully!';
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO blogPosts (user_id, title, content, image_url) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$user_id, $new_title, $new_content, $new_image_url]);
+                    $stmt = $pdo->prepare("INSERT INTO blogPosts (user_id, title, content, image_url, tags) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$user_id, $new_title, $new_content, $new_image_url, $new_tags]);
                     $_SESSION['message'] = 'New blog post created successfully!';
                 }
                 header("Location: /index.php");
@@ -140,8 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="editor-header">
             <h1 class="editor-page-title"><?php echo $page_title; ?></h1>
             <div class="editor-actions">
-                <span>Your changes are saved automatically.</span>
-                
+                <span>Markdown formatting is supported.</span>
             </div>
         </div>
 
@@ -149,21 +149,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form action="<?php echo htmlspecialchars($form_action); ?>" method="POST" enctype="multipart/form-data" class="blog-editor-form">
             <?php echo csrf_field(); ?>
-            <label for="title" style="display: none;">Title:</label> <!-- Hidden label for styling -->
+            <label for="title" style="display: none;">Title:</label>
             <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" placeholder="Enter your blog title here..." required>
 
-            <label for="content" style="display: none;">Content:</label> <!-- Hidden label for styling -->
+            <label for="tags" style="font-family: var(--font-sans); font-size: 0.9rem; color: var(--light-text); display: block; margin-top: 10px; margin-bottom: 5px;">Tags (comma-separated, e.g. Technology, Productivity, Design):</label>
+            <input type="text" id="tags" name="tags" value="<?php echo htmlspecialchars($tags); ?>" placeholder="e.g. Technology, Productivity, Design" style="font-family: var(--font-sans); font-size: 1rem; padding: 10px 15px; border-radius: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+
+            <label for="content" style="display: none;">Content:</label>
+            <textarea id="content" name="content" placeholder="Start writing your story... (Supports Markdown: # Header, **bold**, *italics*, `code`, - list)" required><?php echo htmlspecialchars($content); ?></textarea>
             
-            <textarea id="content" name="content" placeholder="Start writing your amazing story..." required><?php echo htmlspecialchars($content); ?></textarea>
-<label for="blog_image">Upload Image (Optional)</label>
-        <input type="file" id="blog_image" name="blog_image" accept="image/*" class="mb-4" style="font-family: var(--font-sans); font-size: 1rem; padding: 10px 15px; border-radius: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 100%; box-sizing: border-box;">
-        <?php if (!empty($image_url)): // Show current image if editing and one exists ?>
-            <div style="margin-bottom: 20px;">
-                <p style="color: var(--light-text); font-size: 0.9em;">Current Image:</p>
-                <img src="<?php echo htmlspecialchars($image_url); ?>" alt="Current Blog Image" style="max-width: 200px; height: auto; border-radius: 8px;">
-            </div>
-        <?php endif; ?>
-            
+            <label for="blog_image" style="font-family: var(--font-sans); font-size: 0.9rem; color: var(--light-text); display: block; margin-top: 10px; margin-bottom: 5px;">Upload Header Image (Optional)</label>
+            <input type="file" id="blog_image" name="blog_image" accept="image/*" class="mb-4" style="font-family: var(--font-sans); font-size: 1rem; padding: 10px 15px; border-radius: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 100%; box-sizing: border-box;">
+            <?php if (!empty($image_url)): ?>
+                <div style="margin-bottom: 20px;">
+                    <p style="color: var(--light-text); font-size: 0.9em;">Current Image:</p>
+                    <img src="<?php echo htmlspecialchars($image_url); ?>" alt="Current Blog Image" style="max-width: 200px; height: auto; border-radius: 8px;">
+                </div>
+            <?php endif; ?>
 
             <div class="submit-btn-group">
                 <button type="submit" class="btn"><?php echo ($blog_id ? 'Save Changes' : 'Create Post'); ?></button>
