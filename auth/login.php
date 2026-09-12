@@ -11,45 +11,54 @@ $message = $_SESSION['message'] ?? '';
 unset($_SESSION['message']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username_or_email = trim($_POST['username_or_email']);
-    $password = $_POST['password'];
-
-    if (empty($username_or_email) || empty($password)) {
-        $message = '<div class="message error">Please enter both username/email and password.</div>';
+    if (!verify_csrf_token()) {
+        http_response_code(403);
+        $message = '<div class="message error">Invalid or expired CSRF token. Please refresh and try again.</div>';
     } else {
-        try {
-            $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
-            $stmt->execute([$username_or_email, $username_or_email]);
-            $user = $stmt->fetch();
+        $username_or_email = trim($_POST['username_or_email']);
+        $password = $_POST['password'];
 
-            if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
+        if (empty($username_or_email) || empty($password)) {
+            $message = '<div class="message error">Please enter both username/email and password.</div>';
+        } else {
+            try {
+                $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
+                $stmt->execute([$username_or_email, $username_or_email]);
+                $user = $stmt->fetch();
 
-                // Check if 'Remember Me' was checked
-                if (isset($_POST['remember_me'])) {
-                    // Set a secure persistent cookie with user ID and HMAC signature
-                    $cookie_name = 'remember_me';
-                    $cookie_hash = hash_hmac('sha256', $user['id'], APP_SECRET_KEY);
-                    $cookie_value = $user['id'] . ':' . $cookie_hash;
-                    $expiration = time() + (30 * 24 * 60 * 60); // 30 days
-                    setcookie($cookie_name, $cookie_value, [
-                        'expires'  => $expiration,
-                        'path'     => '/',
-                        'httponly' => true,
-                        'samesite' => 'Lax'
-                    ]);
+                if ($user && password_verify($password, $user['password'])) {
+                    // Prevent Session Fixation attack
+                    session_regenerate_id(true);
+
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+                    // Check if 'Remember Me' was checked
+                    if (isset($_POST['remember_me'])) {
+                        // Set a secure persistent cookie with user ID and HMAC signature
+                        $cookie_name = 'remember_me';
+                        $cookie_hash = hash_hmac('sha256', $user['id'], APP_SECRET_KEY);
+                        $cookie_value = $user['id'] . ':' . $cookie_hash;
+                        $expiration = time() + (30 * 24 * 60 * 60); // 30 days
+                        setcookie($cookie_name, $cookie_value, [
+                            'expires'  => $expiration,
+                            'path'     => '/',
+                            'httponly' => true,
+                            'samesite' => 'Lax'
+                        ]);
+                    }
+
+                    $_SESSION['message'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
+                    header("Location: /index.php");
+                    exit();
+                } else {
+                    $message = '<div class="message error">Invalid username/email or password.</div>';
                 }
-
-                $_SESSION['message'] = 'Welcome back, ' . htmlspecialchars($user['username']) . '!';
-                header("Location: /index.php");
-                exit();
-            } else {
-                $message = '<div class="message error">Invalid username/email or password.</div>';
+            } catch (PDOException $e) {
+                error_log("Login error: " . $e->getMessage());
+                $message = '<div class="message error">Login failed due to a system error. Please try again.</div>';
             }
-        } catch (PDOException $e) {
-            error_log("Login error: " . $e->getMessage());
-            $message = '<div class="message error">Login failed due to a system error. Please try again.</div>';
         }
     }
 }
@@ -64,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php echo $message; ?>
 
         <form action="/auth/login.php" method="POST">
+            <?php echo csrf_field(); ?>
             <label for="username_or_email">Email or Username</label>
             <div class="input-group">
                 <input type="text" id="username_or_email" name="username_or_email" placeholder="Enter your email or username" required>

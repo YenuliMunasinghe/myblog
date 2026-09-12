@@ -5,38 +5,43 @@ require_once __DIR__ . '/../includes/header.php';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-
-    if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-        $message = '<div class="message error">Please fill in all fields.</div>';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = '<div class="message error">Invalid email format.</div>';
-    } elseif ($password !== $confirm_password) {
-        $message = '<div class="message error">Passwords do not match.</div>';
-    } elseif (strlen($password) < 6) {
-        $message = '<div class="message error">Password must be at least 6 characters long.</div>';
+    if (!verify_csrf_token()) {
+        http_response_code(403);
+        $message = '<div class="message error">Invalid or expired CSRF token. Please refresh and try again.</div>';
     } else {
-        try {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
-            $stmt->execute([$username, $email]);
-            if ($stmt->fetchColumn() > 0) {
-                $message = '<div class="message error">Username or email already exists.</div>';
-            } else {
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password = $_POST['password'];
+        $confirm_password = $_POST['confirm_password'];
 
-                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
-                $stmt->execute([$username, $email, $hashed_password]);
+        if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
+            $message = '<div class="message error">Please fill in all fields.</div>';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = '<div class="message error">Invalid email format.</div>';
+        } elseif ($password !== $confirm_password) {
+            $message = '<div class="message error">Passwords do not match.</div>';
+        } elseif (strlen($password) < 6) {
+            $message = '<div class="message error">Password must be at least 6 characters long.</div>';
+        } else {
+            try {
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?");
+                $stmt->execute([$username, $email]);
+                if ($stmt->fetchColumn() > 0) {
+                    $message = '<div class="message error">Username or email already exists.</div>';
+                } else {
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                $_SESSION['message'] = 'Registration successful! You can now log in.';
-                header("Location: /auth/login.php");
-                exit();
+                    $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
+                    $stmt->execute([$username, $email, $hashed_password]);
+
+                    $_SESSION['message'] = 'Registration successful! You can now log in.';
+                    header("Location: /auth/login.php");
+                    exit();
+                }
+            } catch (PDOException $e) {
+                error_log("Registration DB error: " . $e->getMessage());
+                $message = '<div class="message error">Registration failed due to a system error. Please try again.</div>';
             }
-        } catch (PDOException $e) {
-            error_log("Registration DB error: " . $e->getMessage());
-            $message = '<div class="message error">Registration failed due to a system error. Please try again.</div>';
         }
     }
 }
@@ -50,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php echo $message; ?>
 
         <form action="/auth/register.php" method="POST">
+            <?php echo csrf_field(); ?>
             <label for="username">Full Name</label> <!-- Changed label for username -->
             <div class="input-group">
                 <input type="text" id="username" name="username" placeholder="Enter your full name" required>

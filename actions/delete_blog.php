@@ -1,6 +1,7 @@
 <?php
 // myblog/actions/delete_blog.php
 require_once __DIR__ . '/../config/db_connect.php'; // Include db_connect to start session and get $pdo
+require_once __DIR__ . '/../includes/csrf.php';
 
 // Compute dynamic base path for redirects
 $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])); 
@@ -20,6 +21,11 @@ if (!isset($_SESSION['user_id'])) {
 
 // 2. Check if a blog ID was provided and request method is POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['blog_id'])) {
+    if (!verify_csrf_token()) {
+        $_SESSION['message'] = 'Invalid CSRF token. Request rejected.';
+        header("Location: " . $base_path . "index.php");
+        exit();
+    }
     $blog_id = (int)$_POST['blog_id'];
     $user_id = $_SESSION['user_id']; // The ID of the currently logged-in user
 

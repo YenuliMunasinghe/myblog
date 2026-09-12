@@ -82,6 +82,7 @@ $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user
                 <!-- Form to submit like/unlike action -->
                 <!-- Use a relative action so the URL resolves correctly in subfolder or root installs -->
                 <form action="actions/toggle_like.php" method="POST" style="display: inline-block; margin-left: 15px;">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="blog_id" value="<?php echo $blog_id_for_like_feature; ?>">
                     <button type="submit" class="btn btn-like <?php echo $user_has_liked ? 'liked' : ''; ?>" title="<?php echo $user_has_liked ? 'Unlike this post' : 'Like this post'; ?>">
                         <?php if ($user_has_liked): ?>
@@ -106,6 +107,7 @@ $is_author = (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $blog['user
                 <div class="blog-actions">
                     <a href="/create_blog.php?id=<?php echo htmlspecialchars($blog['id']); ?>" class="btn">Edit Blog</a>
                     <form action="/actions/delete_blog.php" method="POST" style="display: inline-block;">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="blog_id" value="<?php echo htmlspecialchars($blog['id']); ?>">
                         <button type="submit" onclick="return confirm('Are you sure you want to delete this blog post?');" class="btn delete-btn">Delete Blog</button>
                     </form>
