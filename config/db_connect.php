@@ -21,11 +21,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// --- Database credentials (from environment or defaults) ---
-$host = getenv('DB_HOST') ?: 'localhost';
-$dbname = getenv('DB_NAME') ?: 'blog_app';
-$username = getenv('DB_USER') ?: 'root';
-$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+// --- Database credentials (from environment or InfinityFree defaults) ---
+$host = getenv('DB_HOST') ?: 'sql105.infinityfree.com';
+$dbname = getenv('DB_NAME') ?: 'if0_42902650_XXX';
+$username = getenv('DB_USER') ?: 'if0_42902650';
+$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'BlogApp2026';
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
 $options = [
