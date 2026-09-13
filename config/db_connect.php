@@ -23,7 +23,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // --- Database credentials (from environment or InfinityFree defaults) ---
 $host = getenv('DB_HOST') ?: 'sql105.infinityfree.com';
-$dbname = getenv('DB_NAME') ?: 'if0_42902650_XXX';
+$dbname = getenv('DB_NAME') ?: 'if0_42902650_myblog';
 $username = getenv('DB_USER') ?: 'if0_42902650';
 $password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'BlogApp2026';
 
