@@ -1,171 +1,287 @@
-# MyBlog - A Simple PHP Blog Application
+# 🚀 MyBlog - Modern PHP & MySQL Blogging Platform
 
-MyBlog is a minimalist blog application built with HTML, CSS, JavaScript for the frontend, PHP for the backend, and MySQL as the database. It allows users to register, log in, create, view, update, and delete their own blog posts.
+![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-InnoDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Security](https://img.shields.io/badge/Security-CSRF%20%7C%20HMAC%20%7C%20PDO-success?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-## Features
+**MyBlog** is a feature-rich, minimalist blog application built with HTML5, CSS3, Vanilla JavaScript, native PHP (PDO), and MySQL. It empowers writers to create, publish, tag, edit, and manage stories while providing readers with an engaging, dark-themed reading experience.
 
-*   **User Authentication:** Register, Log In, Log Out.
-*   **Session & Cookie Management:** Users stay logged in using PHP sessions, with a "Remember Me" option using persistent cookies.
-*   **Authorization:** Users can only manage (create, update, delete) their own blog posts.
-*   **Blog Management:**
-    *   Create new blog posts (with a title, content, and optional image URL).
-    *   View all blog posts on the home page.
-    *   View individual blog posts.
-    *   Update existing blog posts.
-    *   Delete own blog posts.
-*   **Responsive UI:** Clean and responsive user interface for various screen sizes.
-*   **Custom Dark Theme:** Modern dark mode design.
+🌐 **Live Demo**: [http://myblog-forwho.lovestoblog.com/](http://myblog-forwho.lovestoblog.com/)
 
-## Technologies Used
+---
 
-*   **Frontend:**
-    *   HTML5
-    *   CSS3
-    *   JavaScript (for minor interactivity like password toggle - *removed in current version*, and for future enhancements)
-    *   Google Fonts (`DM Serif Display`, `Inter`)
-    *   Font Awesome (for icons)
-*   **Backend:**
-    *   PHP (version 7.4+ recommended)
-    *   PDO (PHP Data Objects) for secure database interaction
-*   **Database:**
-    *   MySQL
-*   **Local Development Environment:**
-    *   XAMPP / WAMP / MAMP (Apache web server, MySQL database, PHP interpreter)
-    *   VS Code (code editor)
-*   **Deployment:**
-    *   Free Hosting Provider (e.g., InfinityFree, 000WebHost)
-    *   FTP Client (e.g., FileZilla)
+## 🖼️ Application Screenshots
 
-## Setup Instructions (Local Development)
+| Homepage & Hero Section | Post Editor & Markdown Support |
+| :---: | :---: |
+| ![Hero Section](screenshots/hero_section.png) | ![Post Editor](screenshots/post_editor.png) |
+| *Glassmorphic navigation bar, trending posts, and live keyword search* | *Rich post editor with image uploads, tags, and Markdown parsing* |
 
-Follow these steps to get the project running on  local machine.
+| About Section & Blog Cards | Authentication Interface |
+| :---: | :---: |
+| ![About & Cards](screenshots/about_and_cards.png) | ![Login Page](screenshots/login_page.png) |
+| *Responsive blog cards with reading time badges and like counters* | *Secure authentication with password toggle and Remember Me* |
+
+---
+
+## ✨ Features & Highlights
+
+### 🔑 Authentication & Session Security
+- **User Authentication**: Secure registration, login, and session destruction.
+- **HMAC Signed "Remember Me" Cookies**: Uses HMAC SHA-256 signatures (`user_id:signature`) to prevent cookie forgery and account impersonation.
+- **Session Fixation Defense**: Automatically regenerates session IDs (`session_regenerate_id(true)`) upon authentication.
+
+### 🛡️ Security Hardening
+- **Anti-CSRF Tokens**: All POST forms include anti-CSRF token fields (`csrf_field()`) and server-side verification (`verify_csrf_token()`).
+- **PDO Prepared Statements**: Prevents SQL injection across all database queries.
+- **MIME & Extension Upload Validation**: Image uploads validate both file extensions (`jpg`, `jpeg`, `png`, `gif`, `webp`) and binary MIME types (`mime_content_type()`).
+- **HTTP Security Headers**: Enforces `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection`, and `Referrer-Policy`.
+- **Upload Execution Lockdown**: `.htaccess` protection in `/uploads/images/` blocks execution of scripts (`.php`, `.phtml`, `.exe`).
+
+### 📝 Content & Interactive Features
+- **Markdown Parsing**: Renders Markdown syntax (`# Headers`, `**bold**`, `*italics*`, `` `code` ``, `> quotes`, `- lists`) safely with XSS protection (`htmlspecialchars`).
+- **Category Tags & Filtering**: Tag posts with comma-separated tags and filter posts on the homepage by clicking tag badges.
+- **Live AJAX Liking**: Non-blocking asynchronous Like/Unlike button updates counts instantly without page reloads.
+- **Estimated Reading Time**: Dynamic reading time calculation (`e.g. 2 min read`) on blog cards.
+- **Keyword Search**: Homepage search bar to search posts by title, content, or tags.
+
+### 🎨 Visual & UI Design
+- **Glassmorphic Sticky Header**: Sticky top navigation bar with backdrop blur filter (`backdrop-filter: blur(14px)`).
+- **Interactive Card Hover Animations**: Smooth image scale zoom and glowing neon borders on hover.
+- **Custom Dark Theme**: Modern dark mode aesthetics built with custom CSS variables.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | HTML5, CSS3 (Variables, Flexbox/Grid, Glassmorphism), Vanilla JS (Fetch API) |
+| **Icons & Fonts** | Font Awesome 6, Google Fonts (*DM Serif Display*, *Inter*) |
+| **Backend** | PHP 7.4+ / PHP 8.x (PDO Object-Oriented Interface) |
+| **Database** | MySQL (InnoDB Engine, Foreign Key Constraints & Cascades) |
+| **Security** | CSRF Tokens, HMAC SHA-256 Cookie Signing, Password Bcrypt Hashing |
+| **Deployment** | InfinityFree / cPanel / Apache Web Server |
+
+---
+
+## 📁 Repository Structure
+
+```
+myblog/
+├── actions/
+│   ├── delete_blog.php       # Handles post deletion with ownership & CSRF checks
+│   └── toggle_like.php       # Handles AJAX & standard POST like toggling
+├── auth/
+│   ├── login.php             # User login & HMAC Remember Me cookie setting
+│   ├── logout.php            # Session destruction & cookie invalidation
+│   └── register.php          # Account creation & password hashing
+├── config/
+│   └── db_connect.php        # PDO connection, secure session, & Remember Me auto-login
+├── css/
+│   └── style.css             # Main dark theme & glassmorphic stylesheet
+├── includes/
+│   ├── csrf.php              # CSRF token generation & validation helper
+│   ├── footer.php            # Page footer template & script imports
+│   ├── header.php            # Glassmorphic header nav & HTTP security headers
+│   └── markdown.php          # Lightweight safe Markdown parser
+├── js/
+│   └── script.js             # Client-side JS & AJAX fetch handling for likes
+├── screenshots/             # Repository documentation screenshots
+│   ├── hero_section.png
+│   ├── post_editor.png
+│   ├── about_and_cards.png
+│   └── login_page.png
+├── uploads/
+│   └── images/               # Header images upload folder (.htaccess secured)
+├── create_blog.php           # Post editor (create & edit) with tags & image upload
+├── index.php                 # Homepage listing trending posts, search, & tag filters
+├── single_blog.php           # Post details view with Markdown rendering & likes
+└── README.md                 # Project documentation
+```
+
+---
+
+## 🗄️ Database Schema (SQL)
+
+Run the following SQL script in **phpMyAdmin** to set up the database tables:
+
+```sql
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `username` varchar(50) NOT NULL UNIQUE,
+  `email` varchar(100) NOT NULL UNIQUE,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(20) DEFAULT 'user'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `blogPosts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `user_id` int(11) NOT NULL,
+  `blog_id` int(11) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`blog_id`) REFERENCES `blogPosts`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+---
+
+## 💻 Local Setup Instructions
 
 ### Prerequisites
+- Install [XAMPP](https://www.apachefriends.org/index.html), WAMP, or MAMP.
+- Code Editor (e.g. [VS Code](https://code.visualstudio.com/)).
 
-*   Install [XAMPP](https://www.apachefriends.org/index.html) (or WAMP/MAMP)
-*   Install a code editor like [VS Code](https://code.visualstudio.com/)
+### 1. Clone & Place Files
+Clone or place the `myblog` directory inside your web server document root:
+- Windows XAMPP: `C:\xampp\htdocs\myblog`
+- macOS XAMPP: `/Applications/XAMPP/htdocs/myblog`
 
-### 1. Project Setup
+### 2. Database Configuration
+1. Open XAMPP Control Panel and start **Apache** and **MySQL**.
+2. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
+3. Create a new database named `blog_app`.
+4. Import the SQL table schema above in the **SQL** tab.
+5. Check `config/db_connect.php` to ensure credentials match your local database:
+   ```php
+   $host = getenv('DB_HOST') ?: 'localhost';
+   $dbname = getenv('DB_NAME') ?: 'blog_app';
+   $username = getenv('DB_USER') ?: 'root';
+   $password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+   ```
 
-1.  **Clone or Download:** Get the project files and place the `myblog` folder inside  web server's document root:
-    *   `C:\xampp\htdocs\` (for Windows XAMPP)
-    *   `/Applications/XAMPP/htdocs/` (for macOS XAMPP)
-    *   `C:\wamp\www\` (for Windows WAMP)
-    *   `/Applications/MAMP/htdocs/` (for macOS MAMP)
-    So, uproject path will be `.../htdocs/myblog/`.
+### 3. Run Locally
+Open your browser and visit: `http://localhost/myblog/`
 
-### 2. Database Setup (Local)
+---
 
-1.  **Start XAMPP/WAMP/MAMP:** Open the control panel and start `Apache` and `MySQL`.
-2.  **Access phpMyAdmin:** Open ubrowser and go to `http://localhost/phpmyadmin/`.
-3.  **Create Database:** Click `New` on the left sidebar, enter `blog_app` as the database name, and click `Create`.
-4.  **Import Tables:**
-    *   Select the `blog_app` database on the left.
-    *   Go to the `SQL` tab.
-    *   Copy and paste the following SQL code into the query box and click `Go`:
-        ```sql
-        CREATE TABLE `users` (
-          `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-          `username` varchar(50) NOT NULL UNIQUE,
-          `email` varchar(100) NOT NULL UNIQUE,
-          `password` varchar(255) NOT NULL,
-          `role` varchar(20) DEFAULT 'user'
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+## 🌐 Live Online Deployment (InfinityFree / cPanel)
 
-        CREATE TABLE `blogPosts` (
-          `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-          `user_id` int(11) NOT NULL,
-          `title` varchar(255) NOT NULL,
-          `content` text NOT NULL,
-          `image_url` varchar(255) DEFAULT NULL,
-          `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ```
-        *(Alternatively, you can export ulocal `blog_app.sql` from uprevious setup and import it here)*
+### 1. Database Setup
+1. Create a MySQL database in your InfinityFree / cPanel control panel.
+2. Open phpMyAdmin and import the SQL table schema.
 
-### 3. Configure Database Connection
+### 2. File Upload via FileZilla FTP
+1. Open **FileZilla** and connect using your FTP Host (`ftpupload.net`), Username (`if0_XXXXXXXX`), and Password (Port `21`).
+2. Open the **`htdocs/`** directory on the remote site panel.
+3. Delete the default `index2.html` file if present.
+4. Upload all project files directly into `htdocs/`.
 
-1.  **Open `myblog/config/db_connect.php`** in VS Code.
-2.  **Ensure the credentials are set for ulocal database:**
-    ```php
-    $host = 'localhost';
-    $dbname = 'blog_app';
-    $username = 'root';
-    $password = ''; // Typically empty for XAMPP/WAMP/MAMP
-    ```
+### 3. Update Database Credentials
+In `config/db_connect.php`, update the default fallback values to your live hosting database details:
+```php
+$host = getenv('DB_HOST') ?: 'sql105.infinityfree.com';
+$dbname = getenv('DB_NAME') ?: 'if0_XXXXXXXX_blogdb';
+$username = getenv('DB_USER') ?: 'if0_XXXXXXXX';
+$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'your_password';
+```
 
-### 4. Run the Application
+---
 
-1.  Ensure `Apache` and `MySQL` are running in uXAMPP/WAMP/MAMP control panel.
-2.  Open ubrowser and go to `http://localhost/myblog/`.
+## 🧪 Testing & Quality Assurance
 
-## Deployment Instructions (Online Hosting)
+| Test Suite | Focus Area | Verification Method | Status |
+| :--- | :--- | :--- | :---: |
+| **Authentication QA** | Password Hashing & Cookie Security | Verified bcrypt hash length (60 chars) and HMAC SHA-256 cookie validation (`user_id:hash`). Tested invalid signatures to verify cookie rejection. | ✅ Passed |
+| **CSRF Verification** | Endpoint Integrity | Verified CSRF token rejection across `create_blog.php`, `delete_blog.php`, and `toggle_like.php` when tokens are missing or forged. | ✅ Passed |
+| **SQL Injection QA** | Prepared Statements | Tested SQL injection payloads (`' OR '1'='1`) in search bar, login inputs, and tag filters. All queries bound securely with PDO. | ✅ Passed |
+| **Upload Security** | File Type Validation | Attempted upload of non-image files (`.php`, `.txt`, `.sh`). MIME validation and file extension checks successfully rejected unauthorized formats. | ✅ Passed |
+| **UI & Responsiveness** | Cross-Device Layout | Tested screen resolutions from Mobile (375px) to Desktop (1920px). Glassmorphic header and blog grid scale fluidly. | ✅ Passed |
 
-### 1. Prerequisites
+---
 
-*   A free hosting account (e.g., InfinityFree, 000WebHost).
-*   FTP client software (e.g., [FileZilla Client](https://filezilla-project.org/)).
+## ❓ Troubleshooting & FAQ
 
-### 2. Database Setup (Online)
+<details>
+<summary><b>1. Error: "403 Forbidden" when viewing uploaded images on InfinityFree</b></summary>
+<br>
+InfinityFree free hosting web servers disable custom <code>Options</code> directives in <code>.htaccess</code>. Ensure your <code>/uploads/images/.htaccess</code> file uses Apache 2.4 rules without <code>Options</code>:
 
-1.  **Access Hosting Control Panel:** Log in to uhosting provider's control panel (e.g., cPanel).
-2.  **Create Database & User:**
-    *   Go to "MySQL Databases".
-    *   Create a new database (e.g., `user_blogdb`). Note down the full database name.
-    *   Create a new MySQL user and set a strong password. Note down the full username and password.
-    *   Add the newly created user to udatabase (`user_blogdb`) and grant "ALL PRIVILEGES".
-3.  **Export Local Database:**
-    *   Go to ulocal phpMyAdmin (`http://localhost/phpmyadmin/`), select `blog_app`, click the `Export` tab, choose `Custom`, ensure `SQL` format, select all tables, and check "Add DROP TABLE..." then click `Go` to download `blog_app.sql`.
-4.  **Import to Online Database:**
-    *   In uhosting control panel, open phpMyAdmin for u*online* database (`user_blogdb`).
-    *   Select `user_blogdb` on the left.
-    *   Go to the `Import` tab, choose the `blog_app.sql` file you exported, and click `Go`.
+```apache
+<FilesMatch "\.(php|phtml|php3|php4|php5|phps|phar|exe|pl|py|cgi|asp)$">
+    Require all denied
+</FilesMatch>
+```
+</details>
 
-### 3. Configure Database Connection (Online)
+<details>
+<summary><b>2. Error: "530 Login authentication failed" in FileZilla FTP</b></summary>
+<br>
+Verify that you are using your <b>FTP Account Credentials</b> from the InfinityFree Control Panel (Client Area), NOT your website login or forum credentials. Ensure host is set to <code>ftpupload.net</code> on Port <code>21</code> with explicit FTP over TLS.
+</details>
 
-1.  **Open `myblog/config/db_connect.php`** in VS Code.
-2.  **Change the credentials to u*online* database details:**
-    ```php
-    $host = 'online_database_host'; // e.g., 'sql100.infinityfree.com'
-    $dbname = 'online_database_name'; // e.g., 'if0_XXXXXXXX_blogdb'
-    $username = 'online_database_username'; // e.g., 'if0_XXXXXXXX'
-    $password = 'online_database_password'; // The password  set for the DB user
-    ```
+<details>
+<summary><b>3. Database Connection Failed / Access Denied</b></summary>
+<br>
+Check <code>config/db_connect.php</code>. InfinityFree requires external MySQL hostnames like <code>sql105.infinityfree.com</code> rather than <code>localhost</code>. Ensure the database name in InfinityFree matches the full name (e.g. <code>if0_38000000_blogdb</code>).
+</details>
 
-### 4. Upload Files via FTP
+<details>
+<summary><b>4. Blog post images are not deleting when a blog is removed</b></summary>
+<br>
+The deletion logic in <code>actions/delete_blog.php</code> inspects <code>image_url</code>, checks if it resides in the local <code>uploads/images/</code> folder, and uses PHP's <code>unlink()</code> to safely delete the file from disk while cascading DB deletion.
+</details>
 
-1.  **Connect with FileZilla:** Open FileZilla, enter uFTP Host, Username, Password, and Port (usually 21), then `Quickconnect`.
-2.  **Navigate Remote Site:** On the right (Remote Site), go into u`public_html` (or `htdocs`) folder.
-3.  **Navigate Local Site:** On the left (Local Site), go into u`myblog` project folder (e.g., `C:\xampp\htdocs\myblog`).
-4.  **Upload:** Select *all* files and folders *inside* ulocal `myblog` folder. Drag them directly into the `public_html` folder on the remote site.
-5.  **Overwrite:** If prompted, choose "Overwrite" and "Always use this action".
+---
 
-### 5. Access uLive Site
+## 🔒 Security Audit & Best Practices
 
-1.  Open ubrowser and go to upublic URL (e.g., `http://username.infinityfreeapp.com/`).
-2.  Clear ubrowser cache (`Ctrl+F5` or `Cmd+Shift+R`) for a fresh view.
+- **Password Storage**: Uses PHP's native `password_hash($password, PASSWORD_DEFAULT)` implementing strong bcrypt hashing.
+- **CSRF Token Lifecycle**: Single-use tokens per session regenerated on login and validated on every state-changing POST request.
+- **Cookie Tamper Protection**: "Remember Me" cookie contains an HMAC-SHA256 digest computed using a server secret key. Any client-side tampering invalidates the session immediately.
+- **XSS Prevention**: All user-supplied text rendered in HTML is sanitized using `htmlspecialchars($str, ENT_QUOTES, 'UTF-8')`. Markdown output is stripped of harmful script tags prior to rendering.
 
-## Usage
+---
 
-1.  **Register:** Create a new user account.
-2.  **Login:** Access uaccount.
-3.  **Create Blog:** Add new blog posts with a title, content, and an image URL.
-4.  **View Blogs:** See all posts on the home page or click on a post to view its full content.
-5.  **Edit Blog:** Update uown blog posts (visible only when logged in as the author).
-6.  **Delete Blog:** Remove uown blog posts (visible only when logged in as the author).
-7.  **Logout:** End usession.
+## ⚡ Performance & Optimization Tips
 
-## Future Enhancements (Ideas)
+1. **Gzip / Deflate Compression**: Configured Apache `.htaccess` output compression for CSS, JS, and HTML files to reduce bandwidth consumption.
+2. **Asynchronous Request Handling**: AJAX Fetch API for post likes avoids full-page DOM re-renders.
+3. **Database Indexing**: Foreign key constraints and indexed columns (`user_id`, `blog_id`, `created_at`) ensure sub-millisecond query performance.
+4. **Lazy Image Loading**: HTML `loading="lazy"` attributes on blog feed thumbnails to optimize LCP (Largest Contentful Paint).
 
-*   Implement a full-featured Markdown/Rich Text Editor.
-*   Add a "Tags" system for blog posts.
-*   Improve image management (actual file uploads instead of URLs).
-*   Add user profile pages.
-*   Implement comments section for blog posts.
-*   Better error handling and user feedback.
-*   Use a proper `.env` file for configuration (see below).
+---
 
-## Contact
+## 📜 Changelog & Version History
 
+### `v1.3.0` (2026-09-17) - Security & UX Upgrade
+- Added Anti-CSRF token verification across all forms (`includes/csrf.php`).
+- Upgraded "Remember Me" cookie authentication to HMAC SHA-256 signature verification.
+- Added Safe Markdown parser (`includes/markdown.php`) for blog content.
+- Implemented Tagging system and Tag filtering.
+- Implemented non-blocking AJAX Likes (`actions/toggle_like.php`).
+- Upgraded UI with Glassmorphic navigation and card hover effects.
+
+### `v1.2.0` (2026-09-13) - Feature Enhancements
+- Added Keyword search bar on homepage.
+- Added estimated reading time badge calculations.
+- Improved database error handling with custom exceptions.
+
+### `v1.0.0` (2026-09-10) - Initial Release
+- Core user registration and authentication flow.
+- CRUD operations for blog posts with image URL support.
+- MySQL database schema with InnoDB foreign keys.
+
+---
+
+## 📄 License & Acknowledgments
+
+- **License**: Distributed under the MIT License.
+- **Fonts**: [Google Fonts](https://fonts.google.com/) (*DM Serif Display*, *Inter*)
+- **Icons**: [Font Awesome](https://fontawesome.com/)
+- Developed with native PHP, MySQL, and Modern Web Standards.
